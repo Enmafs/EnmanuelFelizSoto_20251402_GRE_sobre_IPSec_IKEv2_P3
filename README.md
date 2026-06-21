@@ -34,28 +34,27 @@ GRE sobre IPSec con IKEv2. Evolución del Lab03 usando el protocolo de negociaci
 
 | Router | Rol | IP WAN | Interfaz WAN | IP LAN | Interfaz LAN |
 |--------|-----|--------|--------------|--------|--------------|
-| R1-S1 | Peer 1 / Iniciador | 20.25.6.2 | Ethernet0/0 | 10.14.15.0.1/24 | **Ethernet0/3** |
-| R4-S2 | Peer 2 / Respondedor | 20.25.6.6 | Ethernet0/1 | 10.14.25.0.1/24 | Ethernet0/0 |
+| ISP | ENLACE / INTERMEDIARIO | 20.25.1.2 | Ethernet0/0 | -- | -- |
+| R3 | Peer 1 / INICIADOR | 20.25.2.6 | Ethernet0/0 | 30.30.30.1/24 | Ethernet0/1 |
 
 ### ISP
 
-| Interfaz ISP | IP | Descripción |
-|-------------|-----|-------------|
-| Ethernet0/0 | 20.25.6.1/30 | Link to R1-S1 |
-| Ethernet0/1 | 20.25.6.5/30 | Link to R4-S2 |
+| **Interfaz ISP** | **IP** | **Descripción** | | **Rol** |
+|-------------|-----|-------------|-------------|---------|
+| Ethernet0/0 | 20.25.1.1/30 | Link to R1-S1 | | **RESPONDEDOR** |
 
 ### Dirección Túnel
 | Endpoint | IP Tunnel |
 |----------|-----------|
-| R1-S1 Tunnel0 | 14.0.2.13/30/30 |
-| R4-S2 Tunnel0 | 14.0.2.14/30/30 |
+| R3 Tunnel0 | 14.2.10.1/30 |
+| ISP Tunnel0 | 14.2.10.2/30 |
 
 ---
 
 ## ⚙️ Configuración
 
 El script completo de configuración se encuentra en:  
-📄 [`Lab06_GRE_sobre_IPSec_IKEv2.txt`](./Lab06_GRE_sobre_IPSec_IKEv2.txt)
+📄 [`EnmanuelFelizSoto_2025-1402_GRE_sobre_IPSec_IKEv2_P3.txt`](./EnmanuelFelizSoto_2025-1402_GRE_sobre_IPSec_IKEv2_P3.txt)
 
 ### Parámetros IKE/IPSec
 
@@ -129,8 +128,8 @@ ping 10.14.25.10 source 10.14.15.2
 | Recurso | Enlace |
 |---------|--------|
 | Repositorio Principal | [Enmafs/NetSec](https://github.com/Enmafs/NetSec) |
-| Script de configuración | [`Lab06_GRE_sobre_IPSec_IKEv2.txt`](./Lab06_GRE_sobre_IPSec_IKEv2.txt) |
-| Video demostración | 🎬 **[PENDIENTE — agregar link de YouTube]** |
+| Script de configuración | [`EnmanuelFelizSoto_2025-1402_GRE_sobre_IPSec_IKEv2_P3.txt`](./EnmanuelFelizSoto_2025-1402_GRE_sobre_IPSec_IKEv2_P3.txt) |
+| Video demostración | 🎬 [Aquí](https://youtu.be/G_8rjwIpjy4) |
 
 ---
 
