@@ -1,140 +1,164 @@
 ! ============================================================
-! VPN Lab 06 - GRE sobre IPSec + IKEv2
-! GRE Tunnel con proteccion IKEv2
-! Enmanuel Feliz Soto | Matricula: 2025-1402 | Seccion 2-1C
+! VPN Site-to-Site: GRE sobre IPSec (IKEv2) + EIGRP
+! Peers: ISP y R3 | Transito: R1
+! Enmanuel Feliz Soto | Matricula: 2025-1402
 ! ITLA - Seguridad en Redes
 ! ============================================================
 
-! ---- ISP ----
+! ------------------------------------------------------------
+! 1. R1 (Enrutador de Tránsito)
+! ------------------------------------------------------------
+enable
+configure terminal
+hostname R1
+!
+interface Ethernet0/0
+ description Link-to-ISP
+ ip address 20.25.1.2 255.255.255.252
+ no shutdown
+!
+interface Ethernet0/2
+ description Link-to-R3
+ ip address 20.25.2.5 255.255.255.252
+ no shutdown
+!
+end
+
+! ------------------------------------------------------------
+! 2. ISP (Peer 1)
+! ------------------------------------------------------------
 enable
 configure terminal
 hostname ISP
 !
-interface Ethernet0/0
- ip address 20.25.6.1 255.255.255.252
- no shutdown
-!
-interface Ethernet0/1
- ip address 20.25.6.5 255.255.255.252
- no shutdown
-!
-end
-
-! ---- R1-S1 ----
-enable
-configure terminal
-hostname R1-S1
-!
 ip cef
 !
-crypto ikev2 proposal IKEV2-PROPOSAL
+! -- Fase 1: IKEv2 --
+crypto ikev2 proposal IKEV2-PROP
  encryption aes-cbc-256
  integrity sha256
  group 14
 !
-crypto ikev2 policy IKEV2-POLICY
- proposal IKEV2-PROPOSAL
+crypto ikev2 policy IKEV2-POL
+ proposal IKEV2-PROP
 !
-crypto ikev2 keyring IKEV2-KEYRING-GRE
- peer R4-S2
-  address 20.25.6.6
-  pre-shared-key Cisco2025-1402-GRE-V2!
+crypto ikev2 keyring IKEV2-KEYRING
+ peer R3
+  address 20.25.2.6
+  pre-shared-key Cisco2025-1402-GRE!
 !
-crypto ikev2 profile IKEV2-PROFILE-GRE
- match identity remote address 20.25.6.6 255.255.255.255
- authentication local pre-share
+crypto ikev2 profile IKEV2-PROFILE
+ match identity remote address 20.25.2.6 255.255.255.255
+ identity local address 20.25.1.1
  authentication remote pre-share
- keyring local IKEV2-KEYRING-GRE
+ authentication local pre-share
+ keyring local IKEV2-KEYRING
 !
+! -- Fase 2: IPSec --
 crypto ipsec transform-set TS-GRE-IKE2 esp-aes 256 esp-sha256-hmac
  mode tunnel
 !
 crypto ipsec profile GRE-IKEV2-PROFILE
  set transform-set TS-GRE-IKE2
- set ikev2-profile IKEV2-PROFILE-GRE
  set pfs group14
+ set ikev2-profile IKEV2-PROFILE
 !
+! -- Interfaces --
+interface Ethernet0/0
+ description WAN-to-R1
+ ip address 20.25.1.1 255.255.255.252
+ no shutdown
+!
+interface Loopback0
+ description LAN-ISP
+ ip address 192.168.1.1 255.255.255.0
+!
+! -- Túnel GRE --
 interface Tunnel0
- description GRE-IKEv2-to-R4-S2
- ip address 14.0.2.13 255.255.255.252
+ description GRE-to-R3
+ ip address 14.2.10.1 255.255.255.252
  tunnel source Ethernet0/0
- tunnel destination 20.25.6.6
+ tunnel destination 20.25.2.6
  tunnel protection ipsec profile GRE-IKEV2-PROFILE
  no shutdown
 !
-interface Ethernet0/0
- description WAN-to-ISP
- ip address 20.25.6.2 255.255.255.252
- no shutdown
+! -- Enrutamiento Público (Underlay) --
+ip route 0.0.0.0 0.0.0.0 20.25.1.2
 !
-interface Ethernet0/3
- description LAN-A
- ip address 10.14.15.1 255.255.255.0
- no shutdown
-!
-ip route 0.0.0.0 0.0.0.0 20.25.6.1
-ip route 10.14.25.0 255.255.255.0 Tunnel0
+! -- Enrutamiento Privado VPN (Overlay) --
+router eigrp 1402
+ network 14.2.10.0 0.0.0.3
+ network 192.168.1.0 0.0.0.255
+ no auto-summary
 !
 end
 
-! ---- R4-S2 ----
+! ------------------------------------------------------------
+! 3. R3 (Peer 2)
+! ------------------------------------------------------------
 enable
 configure terminal
-hostname R4-S2
+hostname R3
 !
 ip cef
 !
-crypto ikev2 proposal IKEV2-PROPOSAL
+! -- Fase 1: IKEv2 --
+crypto ikev2 proposal IKEV2-PROP
  encryption aes-cbc-256
  integrity sha256
  group 14
 !
-crypto ikev2 policy IKEV2-POLICY
- proposal IKEV2-PROPOSAL
+crypto ikev2 policy IKEV2-POL
+ proposal IKEV2-PROP
 !
-crypto ikev2 keyring IKEV2-KEYRING-GRE
- peer R1-S1
-  address 20.25.6.2
-  pre-shared-key Cisco2025-1402-GRE-V2!
+crypto ikev2 keyring IKEV2-KEYRING
+ peer ISP
+  address 20.25.1.1
+  pre-shared-key Cisco2025-1402-GRE!
 !
-crypto ikev2 profile IKEV2-PROFILE-GRE
- match identity remote address 20.25.6.2 255.255.255.255
- authentication local pre-share
+crypto ikev2 profile IKEV2-PROFILE
+ match identity remote address 20.25.1.1 255.255.255.255
+ identity local address 20.25.2.6
  authentication remote pre-share
- keyring local IKEV2-KEYRING-GRE
+ authentication local pre-share
+ keyring local IKEV2-KEYRING
 !
+! -- Fase 2: IPSec --
 crypto ipsec transform-set TS-GRE-IKE2 esp-aes 256 esp-sha256-hmac
  mode tunnel
 !
 crypto ipsec profile GRE-IKEV2-PROFILE
  set transform-set TS-GRE-IKE2
- set ikev2-profile IKEV2-PROFILE-GRE
  set pfs group14
+ set ikev2-profile IKEV2-PROFILE
 !
-interface Tunnel0
- description GRE-IKEv2-to-R1-S1
- ip address 14.0.2.14 255.255.255.252
- tunnel source Ethernet0/1
- tunnel destination 20.25.6.2
- tunnel protection ipsec profile GRE-IKEV2-PROFILE
+! -- Interfaces --
+interface Ethernet0/0
+ description WAN-to-R1
+ ip address 20.25.2.6 255.255.255.252
  no shutdown
 !
 interface Ethernet0/1
- description WAN-to-ISP
- ip address 20.25.6.6 255.255.255.252
+ description LAN-R3
+ ip address 30.30.30.1 255.255.255.0
  no shutdown
 !
-interface Ethernet0/0
- description LAN-B
- ip address 10.14.25.1 255.255.255.0
+! -- Túnel GRE --
+interface Tunnel0
+ description GRE-to-ISP
+ ip address 14.2.10.2 255.255.255.252
+ tunnel source Ethernet0/0
+ tunnel destination 20.25.1.1
+ tunnel protection ipsec profile GRE-IKEV2-PROFILE
  no shutdown
 !
-ip route 0.0.0.0 0.0.0.0 20.25.6.5
-ip route 10.14.15.0 255.255.255.0 Tunnel0
+! -- Enrutamiento Público (Underlay) --
+ip route 0.0.0.0 0.0.0.0 20.25.2.5
+!
+! -- Enrutamiento Privado VPN (Overlay) --
+router eigrp 1402
+ network 14.2.10.0 0.0.0.3
+ network 30.30.30.0 0.0.0.255
+ no auto-summary
 !
 end
-
-! ---- Verificacion ----
-ping 10.14.25.10 source 10.14.15.2
-show crypto ikev2 sa
-show crypto ipsec sa
