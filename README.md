@@ -23,7 +23,8 @@ GRE sobre IPSec con IKEv2. Evolución del Lab03 usando el protocolo de negociaci
 
 ## 🗺️ Topología
 
-> 📸 **[INSERTAR CAPTURA DE TOPOLOGÍA AQUÍ]**
+> 📸 <img width="1472" height="805" alt="Captura de pantalla 2026-06-21 154657" src="https://github.com/user-attachments/assets/1779a99f-a845-4feb-b5bb-e5120228d31e" />
+
 
 <!-- Coloca aquí el screenshot de PNetLab con la topología del Lab 06 -->
 
@@ -99,15 +100,18 @@ ping 10.14.25.10 source 10.14.15.2
 
 ## 📸 Capturas de Verificación
 
-> 📸 **[INSERTAR CAPTURA: show crypto ikev2 sa]**
+> 📸 <img width="726" height="150" alt="image" src="https://github.com/user-attachments/assets/e9dc6550-cec2-4e18-a85d-658b83e8f816" />
+
 
 <!-- Captura mostrando el estado QM_IDLE / ESTABLISHED -->
 
-> 📸 **[INSERTAR CAPTURA: show crypto ipsec sa]**
+> 📸 <img width="637" height="372" alt="image" src="https://github.com/user-attachments/assets/ebeb4b9c-e07e-47f3-802e-adc5974f76f2" />
+
 
 <!-- Captura mostrando pkts encaps/decaps incrementando -->
 
-> 📸 **[INSERTAR CAPTURA: ping exitoso]**
+> 📸 <img width="710" height="259" alt="image" src="https://github.com/user-attachments/assets/7f2ff8b9-9735-48c6-9b72-8f2db6ebb3cc" />
+
 
 <!-- Captura del ping source 10.14.15.0/24 -->
 
